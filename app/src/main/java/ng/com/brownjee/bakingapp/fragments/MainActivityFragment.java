@@ -8,6 +8,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -48,7 +50,9 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
     private RecipieAdapter adapter;
     private TextView no_network;
     private SwipeRefreshLayout swipeRefreshLayout;
-
+    private final String KEY_RECYCLER_STATE = "recycler_state";
+    private static Parcelable mBundleRecyclerViewState;
+    RecyclerView.LayoutManager layoutManager;
 
     public MainActivityFragment() {
     }
@@ -72,10 +76,33 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
         return view;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save list state
+        mBundleRecyclerViewState = layoutManager.onSaveInstanceState();
+        outState.putParcelable(KEY_RECYCLER_STATE, mBundleRecyclerViewState);
+    }
+
+    @Override
+    public void onViewStateRestored( Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        // Retrieve list state and list/item positions
+        if(savedInstanceState != null)
+            mBundleRecyclerViewState = savedInstanceState.getParcelable(KEY_RECYCLER_STATE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mBundleRecyclerViewState != null) {
+            layoutManager.onRestoreInstanceState(mBundleRecyclerViewState);
+        }
+    }
 
     void loadViews(ArrayList<Recipie> bakes) {
         recyclerView = (RecyclerView) getActivity().findViewById(R.id.recipie_list);
-        RecyclerView.LayoutManager layoutManager;
+
         if (isTablet) {
             layoutManager = new GridLayoutManager(getActivity(), 3);
         } else {
