@@ -15,7 +15,6 @@
         <activity
             android:name="ng.com.brownjee.bakingapp.activities.MainActivity"
             android:label="@string/app_name"
-            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
