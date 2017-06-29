@@ -73,7 +73,8 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
         layoutManager = new GridLayoutManager(getActivity(), 3);
 
 
-
+        networkUp();
+        downloadRecipes();
 
 
         return view;
@@ -82,8 +83,7 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
     @Override
     public void onStart() {
         super.onStart();
-        networkUp();
-        downloadRecipes();
+
 
     }
 
