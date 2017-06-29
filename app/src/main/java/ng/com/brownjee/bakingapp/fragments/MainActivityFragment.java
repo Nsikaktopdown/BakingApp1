@@ -51,7 +51,9 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
     private TextView no_network;
     private SwipeRefreshLayout swipeRefreshLayout;
     private final String KEY_RECYCLER_STATE = "recycler_state";
+    private final String KEY_RECYCLER_STATE_LAND = "recycler_state_land";
     private static Parcelable mBundleRecyclerViewState;
+    private static  Parcelable mBundleRecyclerLan;
     RecyclerView.LayoutManager layoutManager;
 
     public MainActivityFragment() {
@@ -67,9 +69,10 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swip_to_refresh);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
-        networkUp();
+        recyclerView = (RecyclerView) view.findViewById(R.id.recipie_list);
+        layoutManager = new GridLayoutManager(getActivity(), 3);
 
-        downloadRecipes();
+
 
 
 
@@ -77,31 +80,59 @@ public class MainActivityFragment extends Fragment implements RecipieAdapter.Lis
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        networkUp();
+        downloadRecipes();
+
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save list state
-        mBundleRecyclerViewState = layoutManager.onSaveInstanceState();
-        outState.putParcelable(KEY_RECYCLER_STATE, mBundleRecyclerViewState);
+        if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_PORTRAIT){
+            mBundleRecyclerViewState = layoutManager.onSaveInstanceState();
+            outState.putParcelable(KEY_RECYCLER_STATE, mBundleRecyclerViewState);
+        }
+        else  if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE){
+            mBundleRecyclerLan = layoutManager.onSaveInstanceState();
+            outState.putParcelable(KEY_RECYCLER_STATE_LAND, mBundleRecyclerLan);
+        }
+
     }
 
     @Override
     public void onViewStateRestored( Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         // Retrieve list state and list/item positions
-        if(savedInstanceState != null)
-            mBundleRecyclerViewState = savedInstanceState.getParcelable(KEY_RECYCLER_STATE);
+        if(savedInstanceState != null) {
+            if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_PORTRAIT){
+                mBundleRecyclerViewState = savedInstanceState.getParcelable(KEY_RECYCLER_STATE);
+            }
+            else if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE){
+                mBundleRecyclerLan = savedInstanceState.getParcelable(KEY_RECYCLER_STATE_LAND);
+            }
+
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (mBundleRecyclerViewState != null) {
-            layoutManager.onRestoreInstanceState(mBundleRecyclerViewState);
+            if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_PORTRAIT){
+                layoutManager.onRestoreInstanceState(mBundleRecyclerViewState);
+            }
+            else if(this.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE){
+                layoutManager.onRestoreInstanceState(mBundleRecyclerLan);
+            }
+
         }
     }
 
     void loadViews(ArrayList<Recipie> bakes) {
-        recyclerView = (RecyclerView) getActivity().findViewById(R.id.recipie_list);
+
 
         if (isTablet) {
             layoutManager = new GridLayoutManager(getActivity(), 3);
